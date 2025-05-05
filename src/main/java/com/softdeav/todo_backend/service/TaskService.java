@@ -1,42 +1,57 @@
 package com.softdeav.todo_backend.service;
 
-import com.softdeav.todo_backend.entity.Task;
+import com.softdeav.todo_backend.entity.TaskEntity;
 import com.softdeav.todo_backend.repository.TaskRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-@Service //Indica que es un componente de servicio
-
+@Service
 public class TaskService {
-    private final TaskRepository taskRepository;
 
-    // inyeccion de dependencias por constructor
-    public TaskService(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+    @Autowired
+    private TaskRepository taskRepository;
+
+    // CREATE
+    public TaskEntity createTask(TaskEntity taskEntity) {
+        Date now = new Date();
+        taskEntity.setCreated_at(now);
+        taskEntity.setUpdated_at(now);
+        System.out.println(taskEntity);
+        return taskRepository.save(taskEntity);
     }
 
-    public List<Task> getAllTasks() {
+    // READ (all)
+    public List<TaskEntity> getAllTasks() {
         return taskRepository.findAll();
     }
 
-    public Task createTask(Task task) {
-        return taskRepository.findAllById(id);
+    // READ (by id)
+    public Optional<TaskEntity> getTaskById(Long id) {
+        return taskRepository.findById(id);  // Cambiado de findAllById a findById
     }
 
-    public Task updateTask(Long id, Task taskDetails) {
-        Optional<Task> optionalTask = taskRepository.findById(id);
-        if (optionalTask.isPresent()) {
-            Task task = optionalTask.get();
-            task.setTitle(taskDetails.getTitle());
-            task.setDescription(taskDetails.getDescription());
-            task.setCompleted(taskDetails.isCompleted());
-            return taskRepository.save(task);
-        }
-        return null; // Podrías lanzar una excepción aquí en un caso real
-    }
+    // UPDATE
+//    public TaskEntity updateTask(Long id, TaskEntity taskEntityDetails) {
+//        TaskEntity taskEntity = taskRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("TaskEntity not found"));
+//
+//        taskEntity.setTitle(taskEntityDetails.getTitle());
+//        taskEntity.setDescription(taskEntityDetails.getDescription());
+//        taskEntity.setCompleted(taskEntityDetails.isCompleted());
+//        taskEntity.setDateInitial(taskEntityDetails.getDateInitial());
+//        taskEntity.setDateFinished(taskEntityDetails.getDateFinished());
+//
+//        return taskRepository.save(taskEntity);
+//    }
 
+    // DELETE
     public void deleteTask(Long id) {
-        taskRepository.deleteById(id);
+        TaskEntity taskEntity = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("TaskEntity not found"));
+        taskRepository.delete(taskEntity);
     }
 }
